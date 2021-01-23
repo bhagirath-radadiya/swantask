@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Product Detail{% endblock %}
+
+{% block content %}
+
+    <!-- Start Banner Area -->
+    <section class="banner-area organic-breadcrumb">
+        <div class="container">
+            <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+                <div class="col-first">
+                    <h1>Product Details Page</h1>
+                    <nav class="d-flex align-items-center">
+                        <a href="index.html">Home<span class="lnr lnr-arrow-right"></span></a>
+                        <a href="#">Shop<span class="lnr lnr-arrow-right"></span></a>
+                        <a href="single-product.html">product-details</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- End Banner Area -->
+
+    <!--================Single Product Area =================-->
+    <div class="product_image_area">
+        <div class="container">
+            <div class="row s_product_inner">
+                <div class="col-lg-6">
+                    <div class="s_Product_carousel">
+                        <div class="single-prd-item">
+                            <img class="img-fluid" src="/media/{{ get_product.image }}" alt="">
+                        </div>
+                        <div class="single-prd-item">
+                            <img class="img-fluid" src="/media/{{ get_product.image }}" alt="">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5 offset-lg-1">
+                    <div class="s_product_text">
+                        <h3>{{ get_product.name }}</h3>
+                        <h2>${{ get_product.price }}</h2>
+                        <ul class="list">
+                            <li><a class="active" href="#"><span>Category</span> : {{ get_product.category }}</a></li>
+                            <li><a class="active" href="#"><span>Brand</span> : {{ get_product.brand }}</a></li>
+                            <li><a style="cursor:text"><span>Availibility</span> :{% if get_product.quantity != 0 %} In
+                                Stock{% else %} Out Of Stock{% endif %}</a></li>
+                        </ul>
+                        <br>
+                        <div class="product_count">
+                            <label for="qty">Quantity:</label>
+                            <input type="text" name="qty" id="sst" maxlength="12" value="1" title="Quantity:"
+                                   class="input-text qty">
+                            <button onclick="var result = document.getElementById('sst'); var sst = result.value; if( !isNaN( sst )&amp;&amp; sst <5) result.value++;return false;"
+                                    class="increase items-count" type="button"><i class="lnr lnr-chevron-up"></i>
+                            </button>
+                            <button onclick="var result = document.getElementById('sst'); var sst = result.value; if( !isNaN( sst ) &amp;&amp; sst > 1 ) result.value--;return false;"
+                                    class="reduced items-count" type="button"><i class="lnr lnr-chevron-down"></i>
+                            </button>
+                        </div>
+                        <br>
+                        <div class="card_area d-flex align-items-center">
+                            <a class="primary-btn" onclick="addToCart({{ get_product.id }})">Add to Cart</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================End Single Product Area =================-->
+
+    <br><br>
+
+    <!-- Start related-product Area -->
+    <section class="related-product-area section_gap_bottom">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 text-center">
+                    <div class="section-title">
+                        <h1>Similar products</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="row">
+                        {% for i in similar_product %}
+                            <div class="col-lg-3 col-md-4 col-sm-6 mb-20">
+                                <div class="single-related-product d-flex">
+                                    <a href="/viewProductDetail?productId={{ i.id }}" target="_blank"><img
+                                            src="/media/{{ i.image }}" alt="" style="width: 100px;height: 50px;"></a>
+                                    <div class="desc">
+                                        <a href="/viewProductDetail?productId={{ i.id }}" target="_blank"
+                                           class="title">{{ i.name }}</a>
+                                        <div class="price">
+                                            <h6>${{ i.price }}</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <!-- End related-product Area -->
+
+    <script type="text/javascript">
+
+        function addToCart(productId) {
+            var quantity = document.getElementById('sst').value;
+            var ajax = new XMLHttpRequest();
+
+            ajax.onreadystatechange = function () {
+
+                if (ajax.readyState == 4) {
+
+                    var jsn = JSON.parse(ajax.responseText);
+                    var loginRequire = jsn['loginRequire']
+                    if ('loginRequire' in jsn === true) {
+                        window.location.href = "/login/";
+                    }
+                    if ('success' in jsn === true) {
+                        window.alert(jsn['success'])
+                    }
+                }
+            };
+            ajax.open("get", "/addToCart/indirect?productId=" + productId + "&quantity=" + quantity, true);
+
+            ajax.send()
+        }
+    </script>
+
+{% endblock %}

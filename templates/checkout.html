@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Cart{% endblock %}
+
+{% block content %}
+
+
+    <!-- Start Banner Area -->
+    <section class="banner-area organic-breadcrumb">
+        <div class="container">
+            <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+                <div class="col-first">
+                    <h1>Checkout</h1>
+                    <nav class="d-flex align-items-center">
+                        <a href="index.html">Home<span class="lnr lnr-arrow-right"></span></a>
+                        <a href="single-product.html">Checkout</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- End Banner Area -->
+    <br>
+    {% for message in messages %}
+        <p style="color: red;margin-left: 50%">{{ message }}</p>
+    {% endfor %}
+
+    <!--================Checkout Area =================-->
+    <section class="checkout_area section_gap">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h3>Billing Details</h3>
+                    <div class="col-lg-12">
+                        <form class=" contact_form" action="/loadPayment/" method="post"
+                              id="checkout"
+                              novalidate="novalidate">
+                            {% csrf_token %}
+
+                            <br>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="firstname"
+                                               name="firstname"
+                                               value="{{ profile.user_id.firstname }}"
+                                               placeholder="firstname" onfocus="this.placeholder = ''"
+                                               onblur="this.placeholder = 'firstname'">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="lastname"
+                                               name="lastname"
+                                               value="{{ profile.user_id.lastname }}"
+                                               placeholder="lastname" onfocus="this.placeholder = ''"
+                                               onblur="this.placeholder = 'lastname'">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="mobile_number"
+                                               name="mobile_number"
+                                               value="{{ profile.mobile_number }}"
+                                               placeholder="mobileNumber" onfocus="this.placeholder = ''"
+                                               onblur="this.placeholder = 'mobileNumber'">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="alternate_mobile_number"
+                                               name="alternate_mobile_number"
+                                               value="{{ profile.alternate_mobile_number }}"
+                                               placeholder="Alternate Mobile Number"
+                                               onfocus="this.placeholder = ''"
+                                               onblur="this.placeholder = 'Alternate Mobile Number'">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="address_line_1"
+                                               name="address_line_1"
+                                               value="{{ address.address_line_1 }}"
+                                               placeholder="Address line 1"
+                                               onfocus="this.placeholder = ''"
+                                               onblur="this.placeholder = 'Address line 1'">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="address_line_2"
+                                               name="address_line_2"
+                                               value="{{ address.address_line_2 }}"
+                                               placeholder="Address line 2"
+                                               onfocus="this.placeholder = ''"
+                                               onblur="this.placeholder = 'Address line 2'">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="city" name="city"
+                                               value="{{ address.city }}"
+                                               placeholder="City" onfocus="this.placeholder = ''"
+                                               onblur="this.placeholder = 'City'">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="state" name="state"
+                                               value="{{ address.state }}"
+                                               placeholder="State" onfocus="this.placeholder = ''"
+                                               onblur="this.placeholder = 'State'">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="zipcode"
+                                               name="zipcode" value="{{ address.zipcode }}"
+                                               placeholder="Zip Code" onfocus="this.placeholder = ''"
+                                               onblur="this.placeholder = 'Zip Code'">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="country"
+                                               name="country" value="{{ address.country }}"
+                                               placeholder="Country" onfocus="this.placeholder = ''"
+                                               onblur="this.placeholder = 'Country'">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 text-right">
+                                <button type="submit" value="submit" class="primary-btn" hidden id="formButton">Save
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="order_box">
+                        <h2>Your Order</h2>
+                        <ul class="list">
+                            <li><a href="#">Product <span>Total</span></a></li>
+                            {% for key,value in order.product.items %}
+                                <li><a href="#">{{ value.name }} <span class="middle">x {{ value.quantity }}</span>
+                                    <span
+                                            class="last">${{ value.totalPrice }}</span></a>
+                                </li>
+                            {% endfor %}
+
+                        </ul>
+                        <ul class="list list_2">
+                            <li><a href="#">Subtotal <span>${{ order.totalPrice }}</span></a></li>
+                            <li><a href="#">Tax <span>${{ order.tax }}</span></a></li>
+                            <li><a href="#">Discount <span>{{ order.code }} ${{ order.discount }}</span></a></li>
+                            <li><a href="#">Grand Total <span>${{ order.grandTotal }}</span></a></li>
+
+                        </ul>
+                        <a class="primary-btn" onclick="document.getElementById('formButton').click()">Proceed to
+                            Pay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+    <!--================End Checkout Area =================-->
+
+{% endblock %}

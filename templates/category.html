@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Karma{% endblock %}
+
+{% block content %}
+
+    <!-- Start Banner Area -->
+    <section class="banner-area organic-breadcrumb">
+        <div class="container">
+            <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+                <div class="col-first">
+                    <h1>{% if type == 'brand' %}Shop By Brand{% elif type == 'category' %}Shop By
+                        Category{% endif %}</h1>
+
+                </div>
+            </div>
+        </div>
+    </section>
+    <br><br>
+    <!-- End Banner Area -->
+    <p hidden id="brand_active">{{ brand_active }}</p>
+    <p hidden id="category_active">{{ category_active }}</p>
+    <div class="container" id="productContainer">
+        <div class="row">
+            <div class="col-xl-3 col-lg-4 col-md-5">
+
+                <form action="/shop/" method="post">
+                    {% csrf_token %}
+                    <div class="sidebar-filter mt-50">
+                        <div class="top-filter-head">Product Filters</div>
+                        <div class="common-filter">
+                            <div class="head">Brands</div>
+
+                            <ul>
+                                {% for i in brand %}
+                                    <li class="filter-list"><input class="pixel-radio" type="radio"
+                                                                   id="{{ i.brand }}"
+                                                                   name="brand" value="{{ i.brand }}"
+                                                                   onclick="javascript: submit()"><label
+                                            for="{{ i.brand }}">{{ i.brand }}<span>({{ i.brand_count }})</span></label>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+
+                        </div>
+                        <div class="common-filter">
+                            <div class="head">Category</div>
+                            <ul>
+                                {% for i in category %}
+                                    <li class="filter-list"><input class="pixel-radio" type="radio"
+                                                                   id="{{ i.category }}"
+                                                                   name="category" value="{{ i.category }}"
+                                                                   onclick="javascript: submit()"><label
+                                            for="{{ i.category }}">{{ i.category }}<span>({{ i.category_count }})</span></label>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    <input type="submit" id="formSubmit" hidden>
+                </form>
+            </div>
+            <div class="col-xl-9 col-lg-8 col-md-7">
+
+                <!-- Start Best Seller -->
+                <section class="lattest-product-area pb-40 category-list">
+                    <div class="row">
+                        {% for i in product %}
+                            <div class="col-lg-4 col-md-6">
+                                <div class="single-product">
+                                    <img class="img-fluid" src="/media/{{ i.image }}" alt="" style="height: 200px">
+                                    <div class="product-details">
+                                        <h6>{{ i.name }}</h6>
+                                        <div class="price">
+                                            <h6>${{ i.price }}</h6>
+                                        </div>
+                                        <div class="prd-bottom">
+                                        <a class="social-info" onclick="addToCart({{ i.id }})">
+                                            <span class="ti-bag"></span>
+                                            <p class="hover-text">add to bag</p>
+                                        </a>
+                                        <a href="/viewProductDetail?productId={{ i.id }}" target="_blank"
+                                           class="social-info">
+                                            <span class="lnr lnr-move"></span>
+                                            <p class="hover-text">view more</p>
+                                        </a>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+                <!-- End Best Seller -->
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        window.onload = function () {
+            myFunction();
+        };
+
+        function myFunction() {
+
+            document.getElementById(document.getElementById('brand_active').textContent).checked = true;
+            document.getElementById(document.getElementById('category_active').textContent).checked = true;
+        }
+
+    </script>
+
+    <!-- while refresh remove conform form submission alert -->
+    <script>
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
+
+    <script type="text/javascript">
+
+        function addToCart(productId) {
+            var ajax = new XMLHttpRequest();
+
+            ajax.onreadystatechange = function () {
+
+                if (ajax.readyState == 4) {
+
+                    var jsn = JSON.parse(ajax.responseText);
+                    var loginRequire = jsn['loginRequire']
+                    if ('loginRequire' in jsn===true) {
+                        window.location.href = "/login/";
+                    }
+                    if('success' in jsn===true){
+                        window.alert(jsn['success'])
+                    }
+                }
+            };
+            ajax.open("get", "/addToCart/direct?productId=" + productId, true);
+
+            ajax.send()
+        }
+    </script>
+
+
+
+
+
+{% endblock %}

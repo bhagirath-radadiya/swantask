@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Cart{% endblock %}
+
+{% block content %}
+
+    <!-- Start Banner Area -->
+    <section class="banner-area organic-breadcrumb">
+        <div class="container">
+            <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+                <div class="col-first">
+                    <h1>Shopping Cart</h1>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- End Banner Area -->
+    <br>
+    {% for message in messages %}
+        <p style="color: red;margin-left: 50%" >{{ message }}</p>
+    {% endfor %}
+
+    {% if order %}
+        <section class="cart_area">
+            <div class="container">
+                <div class="cart_inner">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Total</th>
+                                <th scope="col"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for key,value in order.product.items %}
+                                <tr id="orderRow{{ key }}">
+                                    <td>
+                                        <div class="media">
+                                            <div class="d-flex">
+                                                <img src="/media/{{ value.image }}" alt=""
+                                                     style="width: 100px;height: 50px">
+                                            </div>
+                                            <div class="media-body">
+                                                <p>{{ value.name }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <h5>${{ value.price }}</h5>
+                                    </td>
+                                    <td>
+                                        <div class="product_count">
+                                            <input type="text" name="qty" id="{{ key }}" maxlength="12"
+                                                   value="{{ value.quantity }}" onclick="updateOrder('{{ key }}')"
+                                                   title="Quantity:"
+                                                   class="input-text qty">
+                                            <button onclick="var result = document.getElementById({{ key }}); var sst = result.value; if( !isNaN( sst )&amp;&amp; sst <5) result.value++;document.getElementById({{ key }}).click();return false;"
+                                                    class="increase items-count" type="button"><i
+                                                    class="lnr lnr-chevron-up"></i></button>
+                                            <button onclick="var result = document.getElementById({{ key }}); var sst = result.value; if( !isNaN( sst ) &amp;&amp; sst > 1 ) result.value--;document.getElementById({{ key }}).click();return false;"
+                                                    class="reduced items-count" type="button"><i
+                                                    class="lnr lnr-chevron-down"></i></button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <h5 id="totalPrice{{ key }}">${{ value.totalPrice }}</h5>
+                                    </td>
+                                    <td><a href="/deleteOrder?productId={{ key }}"><span class="lnr lnr-cross"
+                                                                                         id="close_search"
+                                                                                         title="Close Search"></span></a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+
+                            <tr class="bottom_button">
+                                <td>
+                                    <p> try 'code1' for $100 , 'code2' for $200 , 'code3' for $300</p>
+                                </td>
+                                <td></td>
+                                <td>
+
+                                </td>
+                                <td>
+
+
+                                </td>
+                                <td>
+                                    <div class="cupon_text d-flex align-items-center">
+                                        <input type="text" placeholder="Coupon Code" id="couponCode"
+                                               value="{{ order.code }}">
+                                        <a class="primary-btn" onclick="applyCouponCode()">Apply</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>
+
+                                </td>
+                                <td>
+
+                                </td>
+                                <td>
+                                    <h5>Subtotal</h5>
+                                    <h5>Tax</h5>
+
+                                    <h5>Discount</h5>
+                                    <h5>Grand total</h5>
+                                </td>
+                                <td>
+                                    <h5 id="orderPrice">${{ order.totalPrice }}</h5>
+                                    <h5 id="orderTax">${{ order.tax }}</h5>
+
+                                    <h5 id="discount">{% if order.discount != None %}${{ order.discount }}{% else %}
+                                        $0{% endif %}</h5>
+                                    <h5 id="grandTotal">${{ order.grandTotal }}</h5>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="checkout_btn_inner d-flex align-items-center">
+                            <a class="primary-btn" href="/checkout/">Proceed to checkout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+    {% if empty %}
+        <section class="cart_area">
+            <div class="container">
+                <p>your cart is empty</p>
+            </div>
+        </section>
+
+    {% endif %}
+
+    <script type="text/javascript">
+        function updateOrder(productId) {
+            var quantity = document.getElementById(productId).value;
+
+            var ajax = new XMLHttpRequest();
+
+            ajax.onreadystatechange = function () {
+
+                if (ajax.readyState == 4) {
+
+                    var jsn = JSON.parse(ajax.responseText);
+                    document.getElementById('totalPrice' + productId).innerHTML = '$' + jsn['totalPrice'];
+                    document.getElementById('orderPrice').innerHTML = '$' + jsn['orderPrice'];
+                    document.getElementById('orderTax').innerHTML = '$' + jsn['tax'];
+                    if (jsn['discount'] == null) {
+
+                        document.getElementById('discount').innerHTML = '$0';
+                    }
+                    else {
+                        document.getElementById('discount').innerHTML = '$' + jsn['discount'];
+                    }
+
+
+                    document.getElementById('grandTotal').innerHTML = '$' + jsn['grandTotal'];
+                }
+            };
+            ajax.open("get", "/updateCart?productId=" + productId + "&quantity=" + quantity, true);
+
+            ajax.send()
+        }
+    </script>
+
+    <script type="text/javascript">
+
+        function applyCouponCode() {
+            var couponCode = document.getElementById('couponCode').value;
+
+            var ajax = new XMLHttpRequest();
+
+            ajax.onreadystatechange = function () {
+
+                if (ajax.readyState == 4) {
+
+                    var jsn = JSON.parse(ajax.responseText);
+                    if ('error' in jsn === true) {
+                        alert(jsn['error']);
+                    }
+                    else {
+                        document.getElementById('orderPrice').innerHTML = '$' + jsn['orderPrice'];
+                        document.getElementById('orderTax').innerHTML = '$' + jsn['tax'];
+                        document.getElementById('discount').innerHTML = '$' + jsn['discount'];
+                        document.getElementById('grandTotal').innerHTML = '$' + jsn['grandTotal'];
+
+                    }
+
+                }
+            };
+            ajax.open("get", "/couponCode?couponCode=" + couponCode, true);
+
+            ajax.send()
+        }
+    </script>
+
+{% endblock %}
